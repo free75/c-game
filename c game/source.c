@@ -4,32 +4,44 @@
 #include <time.h>
 #include <conio.h>
 
+#define EMPTY 0
+#define WALL 1
+#define COIN 2
+
 #define WIDTH 20
 #define HEIGHT 10
 
+HANDLE Buffer[2];
+int buffer = 0;
+
+
 //맵 설정 * (나중에 오류 고치기)
 
-char map[HEIGHT][WIDTH] = {
-	"####################",
-	"##X  .......##    ##",
-	"##### ## ##....## ##",
-	"##.......##.##.## ##",
-	"## ##.##....##....##",
-	"## ##.##.##.##.##.##",
-	"#........##.......##",
-	"#.### ##  ###  ##.##",
-	"#.    ###X  ......##",
-	"####################",
+int map[HEIGHT][WIDTH] = {
+	{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+	{1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,1},
+	{1,2,1,1,1,2,1,1,1,2,1,1,1,2,1,1,1,2,2,1},
+	{1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1},
+	{1,2,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,2,2,1},
+	{1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1},
+	{1,2,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,2,2,1},
+	{1,2,2,2,2,2,2,2,2,0,2,2,2,2,2,2,2,2,2,1},
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+	{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
 };
 
 // 오브젝트 위치 * (플레이어 위치, 고스트(방해몹) 위치)
+// 배열문 선언 후에 콘솔 창에 나올 배열문에 함수를 포함해서
+// 플레이어의 위치와 방해몹의 위치를 x,y로 선언
 
-int x = 3;
-int y = 2;
+int px = 1;
+int py = 1;
 int gx = 10;
 int gy = 10;
 
 // 점수창 명령어
+// 배열문에 포함된 . 을 얻을 때마다, 혹은 계속 움직일 때마다
+// 1포인트씩 획득할 수 있도록 설정
 
 int score = 0;
 HANDLE console;
@@ -38,28 +50,112 @@ HANDLE console;
 
 // 초기화
 void clear() {
-	console = GetStdhandle(STD_OUTPUT_HANDLE);
-    srand(time(NULL));
+	Buffer[0] = CreateConsoleScreenBuffer(
+		GENERIC_READ | GENERIC_WRITE,
+		0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+
+	Buffer[1] = CreateConsoleScreenBuffer(
+		GENERIC_READ | GENERIC_WRITE,
+		0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+
+	SetConsoleActiveScreenBuffer(Buffer[0]);
 
 	// 콘솔 창의 커서를 숨기기 위해 사용한 명령어
 	CONSOLE_CURSOR_INFO cursor;
 
+	cursor.dwSize = 1;
+
 	cursor.bVisible = FALSE;
 
-	GetConsoleCursorInfo(console, &cursor);
+	GetConsoleCursorInfo(Buffer[0], &cursor);
+
+	SetConsoleCursorInfo(Buffer[1], &cursor);
+
+	srand(time(NULL));
 
 }
+
 // 커서 이동을 선언하는 명령어
+// 어디에서 실행할지 결정하기 위해서 설정한 명령어
 
-void go(int x, int y) {
-	COORD
+int go(int x, int y) {
+	return map[y][x] != WALL;
+}
+
+void color(HANDLE h, int color) {
+	SetConsoleTextAttribute(h, color);
+}
+
+void player(char key) {
+	int nx = px, ny = py;
+
+	if (key == 'w') ny--;
+	if (key == 'a') nx--;
+	if (key == 's') ny++;
+	if (key == 'd') nx++;
+
+	if (go(nx, ny)) {
+	
+		if (map[ny][nx] == COIN) {
+			score++;
+			map[ny][nx] = EMPTY;
+		}
+
+		px = nx;
+		py = ny;
+	}
+}
+
+int ghost(int nx, int ny) {
+	if (ghost(nx, ny)) {
+		gx = nx;
+		gy = ny;
+		return 1;
+	}
+	return 0;
+}
+
+void ghostmove() {
+	if (px < gx && ghost(gx - 1, gy)) return;
+	if (px > gx && ghost(gx + 1, gy)) return;
+	if (py < gy && ghost(gx, gy - 1)) return;
+	if (py > gy && ghost(gx, gy + 1)) return;
+
+	int willmove = rand() % 4;
+	if (willmove == 0) ghost(gx, gy - 1);
+	if (willmove == 1) ghost(gx, gy + 1);
+	if (willmove == 2) ghost(gx - 1, gy);
+	if (willmove == 3) ghost(gx - 1, gy);
+}
+
+void render() {
+	HANDLE b = Buffer[buffer];
+	COORD position = { 0, 0 };
+	SetConsoleCursorPosition(b, position);
+
+	for (int y = 0; y < HEIGHT; y++) {
+		for (int x = 0; x < WIDTH; x++) {
+
+			if ()
+
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+	}
 
 }
 
-int Move(int x, int y) {
-
-
-}
 
 
 
