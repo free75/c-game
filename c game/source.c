@@ -11,7 +11,7 @@
 #define WIDTH 20
 #define HEIGHT 10
 
-HANDLE Buffer[2];
+HANDLE aBuffer[2];
 int buffer = 0;
 
 
@@ -50,15 +50,15 @@ HANDLE console;
 
 // 초기화
 void clear() {
-	Buffer[0] = CreateConsoleScreenBuffer(
+	aBuffer[0] = CreateConsoleScreenBuffer(
 		GENERIC_READ | GENERIC_WRITE,
 		0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
 
-	Buffer[1] = CreateConsoleScreenBuffer(
+	aBuffer[1] = CreateConsoleScreenBuffer(
 		GENERIC_READ | GENERIC_WRITE,
 		0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
 
-	SetConsoleActiveScreenBuffer(Buffer[0]);
+	SetConsoleActiveScreenBuffer(aBuffer[0]);
 
 	// 콘솔 창의 커서를 숨기기 위해 사용한 명령어
 	CONSOLE_CURSOR_INFO cursor;
@@ -67,9 +67,9 @@ void clear() {
 
 	cursor.bVisible = FALSE;
 
-	GetConsoleCursorInfo(Buffer[0], &cursor);
+	GetConsoleCursorInfo(aBuffer[0], &cursor);
 
-	SetConsoleCursorInfo(Buffer[1], &cursor);
+	SetConsoleCursorInfo(aBuffer[1], &cursor);
 
 	srand(time(NULL));
 
@@ -82,38 +82,49 @@ int go(int x, int y) {
 	return map[y][x] != WALL;
 }
 
-void color(HANDLE h, int color) {
-	SetConsoleTextAttribute(h, color);
+void color(HANDLE handle, int color) {
+	SetConsoleTextAttribute(handle, color);
 }
+
+
 
 void player(char key) {
-	int nx = px, ny = py;
+    if (_kbhit()) {
+		int key = _getch();
+		int nx = px, ny = py;
 
-	if (key == 'w') ny--;
-	if (key == 'a') nx--;
-	if (key == 's') ny++;
-	if (key == 'd') nx++;
+		if (key == 224) {
+			key = _getch();
 
-	if (go(nx, ny)) {
-	
-		if (map[ny][nx] == COIN) {
-			score++;
-			map[ny][nx] = EMPTY;
+			if (key == 72) ny--;
+			if (key == 75) nx--;
+			if (key == 77) nx++;
+			if (key == 80) ny++;
 		}
+		if (go(nx, ny)) {
+			px = nx;
+			py = ny;
 
-		px = nx;
-		py = ny;
+			if (map[px][py] == COIN) {
+				score++;
+				map[py][px] = EMPTY;
+
+			}
+		}
 	}
 }
 
-int ghost(int nx, int ny) {
-	if (ghost(nx, ny)) {
-		gx = nx;
-		gy = ny;
-		return 1;
-	}
-	return 0;
+void ghost(int nx, int ny) {
+	ghost(int x, int y)
+
+
+
+
+		return 0;
 }
+
+
+
 
 void ghostmove() {
 	if (px < gx && ghost(gx - 1, gy)) return;
@@ -128,47 +139,43 @@ void ghostmove() {
 	if (willmove == 3) ghost(gx - 1, gy);
 }
 
-void render() {
-	HANDLE b = Buffer[buffer];
-	COORD position = { 0, 0 };
-	SetConsoleCursorPosition(b, position);
+void render(HANDLE Buffer, int x, int y, const char* character, int color) {
 
-	for (int y = 0; y < HEIGHT; y++) {
-		for (int x = 0; x < WIDTH; x++) {
+	COORD position = { x, y };
 
-			if ()
+	SetConsoleCursorPosition(Buffer, position);
 
-		}
+	//setcolor(Buffer, color);
 
+	DWORD dword;
 
-
-
-
-
-
-
-
-
-
-
-
-	}
+	WriteFile(Buffer, character, strlen(character), &dword, NULL);
 
 }
 
-
-
-
-
+int touch() {
+	return (px == gx && py == gy);
+}
 
 
 int main()
 {
+	clear();
 
+	int delay = 0;
 
+	while (1) {
+		player(1);
 
+		delay++;
 
+		if (delay % 3 == 0)
+			ghostmove();
 
+		if (touch()) break;
+
+		Sleep (60);
+	}
 
 
 	return 0;
