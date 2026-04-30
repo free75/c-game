@@ -1,4 +1,5 @@
 ﻿  source.c
-C:\Users\Administrator\Desktop\c-game\c game\source.c(65,8): warning C4244: '함수': 'time_t'에서 'unsigned int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\Administrator\Desktop\c-game\c game\source.c(79,31): warning C4267: '함수': 'size_t'에서 'DWORD'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\Administrator\Desktop\c-game\c game\source.c(78,8): warning C4244: '함수': 'time_t'에서 'unsigned int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\Administrator\Desktop\c-game\c game\source.c(92,31): warning C4267: '함수': 'size_t'에서 'DWORD'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\Administrator\Desktop\c-game\c game\source.c(278,19): warning C4047: '==': 'void (__cdecl *)()'의 간접 참조 수준이 'int'과(와) 다릅니다.
   c game.vcxproj -> C:\Users\Administrator\Desktop\c-game\c game\x64\Debug\c game.exe

@@ -14,9 +14,23 @@
 HANDLE aBuffer[2];
 int buffer = 0;
 
+// pacman의 입과 몸을 C 와 O 로 표현하고 2프레임으로 구현할 명령어
+char Pacman[2] = {'C', 'O'};
+int animation = 0;
+
 // 오브젝트 위치 * (플레이어 위치, 고스트(방해몹) 위치)
 // 배열문 선언 후에 콘솔 창에 나올 배열문에 함수를 포함해서
 // 플레이어의 위치와 방해몹의 위치를 x,y로 선언
+
+// 방해몹 확장
+// 빨간색으로 표현한 G 방해몹 외에
+// 조건부로 움직이며 플레이어를 방해는 방해몹 추가
+
+// 팩맨 에니메이션 추가 이후
+// 방향 관련 명령어 추가
+
+
+int PACK = 0;
 
 int px = 1;
 int py = 1;
@@ -28,11 +42,11 @@ int score = 0;
 
 int map[HEIGHT][WIDTH] = {
 	{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-	{1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,1},
+	{1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1},
 	{1,2,1,1,1,2,1,1,1,2,1,1,1,2,1,1,1,1,2,1},
-	{1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1},
+	{1,2,0,0,0,2,0,0,0,0,0,0,0,2,0,0,0,0,2,1},
 	{1,2,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,2,1},
-	{1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1},
+	{1,2,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,2,1},
 	{1,2,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,2,1},
 	{1,2,2,2,2,2,2,2,2,0,2,2,2,2,2,2,2,2,2,1},
 	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
@@ -125,10 +139,10 @@ void player(char key) {
 		if (key == 224) {
 			key = _getch();
 
-			if (key == 72) ny--;
-			if (key == 75) nx--;
-			if (key == 77) nx++;
-			if (key == 80) ny++;
+			if (key == 72) { ny--; PACK = 2; }
+			if (key == 75) { nx--; PACK = 1; }
+			if (key == 77) { nx++; PACK = 0; }
+			if (key == 80) { ny++; PACK = 3; }
 		}
 		if (go(nx, ny)) {
 			px = nx;
@@ -154,7 +168,6 @@ void ghostmove() {
 	int GHOSTX = gx;
 	int GHOSTY = gy;
 
-
 	// 앞으로만 움직이는 거 방지차기 위해 만든 코드
 	for (int i = 0; i < 4; i++) { // For문을 하나 더 선언함
 		                          // 이유 방지를 위해서 continue와 함께 사용
@@ -170,9 +183,6 @@ void ghostmove() {
 		
 		ghost[r][0] = tx;
 		ghost[r][1] = ty;
-
-
-
 
 	}
 	for (int i = 0; i < 4; i++) {
@@ -219,18 +229,49 @@ void initialize() {
 		}
 	}
 
-	render(Buffer, px, py, "P", 14);
+	char PACKCH;
+
+	// PACKMAN 플레이어의 UP, DOWN, LEFT, RIGHT 전부 각각 표현하기 위해 사용한 코드
+	if (animation == 0) {
+		PACKCH = 'O';
+	} 
+	else {
+		if (PACK == 0) PACKCH = '>';
+		else if (PACK == 1) PACKCH = '<';
+		else if (PACK == 2) PACKCH = '^';
+		else PACKCH = 'V';
+
+	}
+
+	// 스코어 명령어 코드
+	char pm[2] = { Pacman[animation], '\0' }; 
+
+	render(Buffer, px, py, pm, 14);
 	render(Buffer, gx, gy, "G", 12);
 
 	render(Buffer, 0, HEIGHT - 1, "Score", 7);
 	renderNumber(Buffer, 7, HEIGHT - 1, score, 7);
 
-	buffer = 1 - buffer;
+	buffer = 1 - buffer; 
 }
 
+// touch 코드의 명령어 방해몹과 플레이어가 붙었을 경우 실행되는 명령어
 int touch() {
 	return (px == gx && py == gy);
 }
+
+// 게임 승리 명령어 추가
+
+// 게임 오버 명령어 추가
+
+// 추가하고 싶은 것
+// 스테이지를 하나로만 단정 짓지 않고
+// 스테이지 클리어 시 새로운 스테이지 생성
+// 스테이지 클리어 후엔 clear와 어느 특정한 키를 누를 경우
+// 새로운 스테이지와 새로운 맵에서 플레이 하도록 설정
+// 특정한 키는 백 스페이스 VK_SPACE 로 설정
+// VK_SPACE는 스테이지 클리어 판정이 나왔을 경우
+// clear가 출력됨가 동시에 실행이 가능하도록 설정
 
 int main()
 {
@@ -246,14 +287,23 @@ int main()
 		if (delay % 3 == 0)
 			ghostmove();
 
+		if (delay % 2 == 0)
+			animation = 1 - animation;
+
 		initialize();
 
 		if (touch()) 
 			break;
 
-		Sleep (60);
+		Sleep(60);
+
 	}
 
+	// 지금까지 적어놓은 코드를 계속 실행해보면서 플레이 해본 결과
+	// 자주 끊김
+	// Sleep을 사용한 것과 delay 명령어를 사용하면서 생긴 끈김이라 생각함
+	// Sleep은 ghost의 속도 저하를 위해 선언했기에 변경 불가
+	// 추가적으로 ghost 방해몹의 아이콘에도 에니메이션 추가
 
 	return 0;
 }
